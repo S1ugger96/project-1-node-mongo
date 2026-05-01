@@ -22,8 +22,17 @@ jobs:
     - name: Start containers
       run: docker compose up -d
     
-    - name: Wait for services
-      run: sleep 10
+    - name: Wait for web to be ready
+      run: |
+        echo "Waiting for web to be ready..."
+        for i in {1..30}; do
+          if docker compose exec web curl -f http://localhost:3000/health 2>/dev/null; then
+            echo "Web is ready!"
+            break
+          fi
+          echo "Attempt $i/30: Web not ready, waiting..."
+          sleep 2
+        done
     
     - name: Test Node.js app
       run: curl -f http://localhost:80 || exit 1

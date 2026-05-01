@@ -15,7 +15,7 @@ jobs:
         run: sleep 45
 
       - name: Test
-        run: curl --fail http://localhost
+        run: curl --fail http://localhost:8080
 
       - name: Login to Docker Hub
         run: |

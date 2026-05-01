@@ -1,0 +1,40 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+    
+    - name: Build Docker images
+      run: docker-compose build
+    
+    - name: Start containers
+      run: docker-compose up -d
+    
+    - name: Wait for services
+      run: sleep 10
+    
+    - name: Test Node.js app
+      run: curl -f http://localhost:80 || exit 1
+    
+    - name: Test health endpoint
+      run: curl -f http://localhost:80/health || exit 1
+    
+    - name: Show logs if failed
+      if: failure()
+      run: docker-compose logs
+    
+    - name: Stop containers
+      if: always()
+      run: docker-compose down
